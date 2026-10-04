@@ -14,6 +14,22 @@ uintptr_t vbios_size;
 static bool is_amd_rdna_or_newer(uint16_t vendor_id, uint16_t device_id);
 
 /*
+ * Calculate bits per pixel from linear pixel masks.
+ * Ported from Limine.
+ */
+static uint16_t linear_masks_to_bpp(uint32_t red_mask, uint32_t green_mask,
+                                    uint32_t blue_mask, uint32_t alpha_mask)
+{
+    uint32_t compound_mask = red_mask | green_mask | blue_mask | alpha_mask;
+    uint16_t ret = 32;
+    while ((compound_mask & (1 << 31)) == 0) {
+        ret--;
+        compound_mask <<= 1;
+    }
+    return ret;
+}
+
+/*
  * Find a GOP with a valid framebuffer and set its mode.
  * This is needed for Flanterm and SeaVGABIOS framebuffer access.
  */
