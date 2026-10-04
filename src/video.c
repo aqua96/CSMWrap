@@ -584,6 +584,24 @@ static EFI_STATUS csmwrap_video_seavgabios_init(struct csmwrap_priv *priv)
             return EFI_UNSUPPORTED;
     }
 
+    /*
+     * Recalculate pitch from gop->Mode->Info, as some firmware (e.g. Apple
+     * Macs) report incorrect PixelsPerScanLine via QueryMode.
+     */
+    cb_fb->bytes_per_line = gop->Mode->Info->PixelsPerScanLine * (cb_fb->bits_per_pixel / 8);
+
+    /* Validate pitch */
+    {
+        uint32_t bytes_per_pixel = cb_fb->bits_per_pixel / 8;
+        if (bytes_per_pixel == 0
+         || cb_fb->bytes_per_line % bytes_per_pixel != 0
+         || cb_fb->bytes_per_line < cb_fb->x_resolution * bytes_per_pixel) {
+            printf("Invalid pitch %u (width=%u, bpp=%u)\n",
+                   cb_fb->bytes_per_line, cb_fb->x_resolution, cb_fb->bits_per_pixel);
+            return EFI_UNSUPPORTED;
+        }
+    }
+
     vbios_loc = vgabios_bin;
     vbios_size = sizeof(vgabios_bin);
 
