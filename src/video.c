@@ -605,6 +605,22 @@ static EFI_STATUS csmwrap_video_seavgabios_init(struct csmwrap_priv *priv)
             cb_fb->reserved_mask_size = 8;
             break;
         case PixelBitMask:
+            /* Reject modes with all-zero pixel masks */
+            if ((info->PixelInformation.RedMask
+               | info->PixelInformation.GreenMask
+               | info->PixelInformation.BlueMask
+               | info->PixelInformation.ReservedMask) == 0) {
+                printf("PixelBitMask mode with all-zero masks\n");
+                return EFI_UNSUPPORTED;
+            }
+
+            /* Calculate BPP from masks instead of assuming 32 */
+            cb_fb->bits_per_pixel = linear_masks_to_bpp(
+                info->PixelInformation.RedMask,
+                info->PixelInformation.GreenMask,
+                info->PixelInformation.BlueMask,
+                info->PixelInformation.ReservedMask);
+          
             // Calculate position (find first set bit, 0 if mask is empty)
             cb_fb->red_mask_pos = info->PixelInformation.RedMask ? __builtin_ffs(info->PixelInformation.RedMask) - 1 : 0;
             cb_fb->green_mask_pos = info->PixelInformation.GreenMask ? __builtin_ffs(info->PixelInformation.GreenMask) - 1 : 0;
