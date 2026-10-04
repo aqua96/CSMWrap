@@ -580,12 +580,10 @@ static EFI_STATUS csmwrap_video_seavgabios_init(struct csmwrap_priv *priv)
     cb_fb->physical_address = fb_addr;
     cb_fb->x_resolution = info->HorizontalResolution;
     cb_fb->y_resolution = info->VerticalResolution;
-    /* Always 32 bbp */
-    cb_fb->bytes_per_line = info->PixelsPerScanLine * 4;
-    cb_fb->bits_per_pixel = 32;
 
     switch (info->PixelFormat) {
         case PixelRedGreenBlueReserved8BitPerColor:
+            cb_fb->bits_per_pixel = 32;
             cb_fb->red_mask_pos = 0;
             cb_fb->red_mask_size = 8;
             cb_fb->green_mask_pos = 8;
@@ -596,6 +594,7 @@ static EFI_STATUS csmwrap_video_seavgabios_init(struct csmwrap_priv *priv)
             cb_fb->reserved_mask_size = 8;
             break;
         case PixelBlueGreenRedReserved8BitPerColor:
+            cb_fb->bits_per_pixel = 32;
             cb_fb->blue_mask_pos = 0;
             cb_fb->blue_mask_size = 8;
             cb_fb->green_mask_pos = 8;
