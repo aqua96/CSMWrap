@@ -578,6 +578,8 @@ static EFI_STATUS csmwrap_video_seavgabios_init(struct csmwrap_priv *priv)
             return EFI_UNSUPPORTED;
     }
 
+    cb_fb->bytes_per_line = gop->Mode->Info->PixelsPerScanLine * (cb_fb->bits_per_pixel / 8);
+
     vbios_loc = vgabios_bin;
     vbios_size = sizeof(vgabios_bin);
 
