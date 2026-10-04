@@ -42,21 +42,6 @@ static bool gop_mode_usable(EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop)
     if (Gop->Mode->FrameBufferBase == 0)
         return false;
 
-    EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *mi = Gop->Mode->Info;
-
-    if (mi->PixelFormat >= PixelBltOnly)
-        return false;
-
-    if (mi->PixelFormat == PixelBitMask
-     && (mi->PixelInformation.RedMask
-       | mi->PixelInformation.GreenMask
-       | mi->PixelInformation.BlueMask
-       | mi->PixelInformation.ReservedMask) == 0)
-        return false;
-
-    if (mi->PixelsPerScanLine < mi->HorizontalResolution)
-        return false;
-
     return true;
 }
 
