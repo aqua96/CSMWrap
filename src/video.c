@@ -86,10 +86,33 @@ static EFI_STATUS FindGop(struct csmwrap_priv *priv)
                 continue;
             }
 
-            if (Gop->Mode->FrameBufferBase != 0) {
-                found = true;
-                break;
+            if (Gop->Mode->FrameBufferBase == 0) {
+                continue;
             }
+
+            EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *mi = Gop->Mode->Info;
+
+            /* Skip PixelBltOnly and unknown pixel formats */
+            if (mi->PixelFormat >= PixelBltOnly) {
+                continue;
+            }
+
+            /* Reject PixelBitMask modes with all-zero masks */
+            if (mi->PixelFormat == PixelBitMask
+             && (mi->PixelInformation.RedMask
+               | mi->PixelInformation.GreenMask
+               | mi->PixelInformation.BlueMask
+               | mi->PixelInformation.ReservedMask) == 0) {
+                continue;
+            }
+
+            /* Validate pitch: PixelsPerScanLine must be >= HorizontalResolution */
+            if (mi->PixelsPerScanLine < mi->HorizontalResolution) {
+                continue;
+            }
+
+            found = true;
+            break;
         }
 
         if (!found) {
